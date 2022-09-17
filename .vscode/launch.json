@@ -1,0 +1,26 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "Ruby",//使用Ruby调试器
+            "request": "launch",
+            "name": "Current",
+            "program": "${file}",
+        },
+        {
+            "type": "Ruby",//使用Ruby调试器
+            "request": "launch",
+            "name": "Main",
+            "program": "${workspaceRoot}/main.rb",
+        },
+        {
+            "type": "Ruby",
+            "request": "launch",
+            "name": "Test1",
+            "program": "${workspaceRoot}/test1.rb",
+        }
+    ]
+}
