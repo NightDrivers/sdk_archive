@@ -1,3 +1,6 @@
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+#LOAD_PATH 为文件加载的路径数组，这段代码表示将当前文件所在的目录添加至加载目录
+require "directory.rb"
 
 require 'optparse'
 
@@ -9,8 +12,8 @@ opt_parser = OptionParser.new do |opts|
     opts.separator 'Specific options:'
     opts.separator ''
     
-    opts.on('-t Target', '--target Target', 'Target') do |value|
-        options[:target] = value
+    opts.on('-t Target', '--sdk_target Target', 'Target') do |value|
+        options[:sdk_target] = value
     end
     
     opts.on_tail('-h', '--help', 'Show this message') do
@@ -21,27 +24,14 @@ end
 
 opt_parser.parse!(ARGV)
 
-target_name = options[:target]
+sdk_target_name = options[:sdk_target]
 
-def deleteDirectory(dirPath)
-    if File.directory?(dirPath)
-        Dir.foreach(dirPath) do |subFile|
-            if subFile != '.' and subFile != '..' 
-                deleteDirectory(File.join(dirPath, subFile));
-            end
-        end
-        Dir.rmdir(dirPath);
-    else
-        if File.exists?(dirPath)
-            File.delete(dirPath)
-        end
-    end
-end
+system 'pwd'
 
 work_dir = 'framework'
 
-iphoneos_dir = 'build/Release-iphoneos/%s.framework' % [target_name]
-iphone_simulator_dir = 'build/Release-iphonesimulator/%s.framework' % [target_name]
+iphoneos_dir = 'build/Release-iphoneos/%s.framework' % [sdk_target_name]
+iphone_simulator_dir = 'build/Release-iphonesimulator/%s.framework' % [sdk_target_name]
 
 if File.directory?('build')
     deleteDirectory('build')
@@ -50,11 +40,15 @@ end
 #puts iphoneos_dir
 #puts iphone_simulator_dir
 
-flag = system 'xcodebuild OTHER_CFLAGS="-fembed-bitcode" -configuration "Release" -target %s -sdk iphoneos build' % [target_name]
+cmd = 'xcodebuild OTHER_CFLAGS="-fembed-bitcode" -configuration "Release" -target %s -sdk iphoneos build' % [sdk_target_name]
+
+puts cmd
+
+flag = system cmd
 
 puts flag
 
-flag = system 'xcodebuild OTHER_CFLAGS="-fembed-bitcode" -configuration "Release" -target %s -sdk iphonesimulator build' % [target_name]
+flag = system 'xcodebuild OTHER_CFLAGS="-fembed-bitcode" -configuration "Release" -target %s -sdk iphonesimulator build' % [sdk_target_name]
 
 puts flag
 
@@ -64,7 +58,7 @@ end
 
 Dir.mkdir(work_dir)
 
-flag = system 'xcrun xcodebuild -create-xcframework -framework %s -framework %s -output %s/%s.xcframework' % [iphoneos_dir, iphone_simulator_dir, work_dir, target_name]
+flag = system 'xcrun xcodebuild -create-xcframework -framework %s -framework %s -output %s/%s.xcframework' % [iphoneos_dir, iphone_simulator_dir, work_dir, sdk_target_name]
 
 puts flag
 

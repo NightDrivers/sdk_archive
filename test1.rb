@@ -1,2 +1,3 @@
-name = 'aaa'
-puts name
+
+
+system 'ls'

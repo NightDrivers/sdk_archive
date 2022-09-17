@@ -15,12 +15,15 @@
             "request": "launch",
             "name": "Main",
             "program": "${workspaceRoot}/main.rb",
+            "cwd": "/Users/ldc/Desktop/CPExample",
+            "args": ["--sdk_target", "CPPrinterSDK"],
         },
         {
             "type": "Ruby",
             "request": "launch",
             "name": "Test1",
             "program": "${workspaceRoot}/test1.rb",
+            "args": ["-target", "CPExample"],
         }
     ]
 }
