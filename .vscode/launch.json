@@ -16,7 +16,7 @@
             "name": "Main",
             "program": "${workspaceRoot}/main.rb",
             "cwd": "/Users/ldc/Desktop/CPExample",
-            "args": ["--project", "CPExample.xcodeproj", "--demo_target", "CPExample", "--sdk_target", "CPPrinterSDK", "--sdk_framework_path", "framework/CPPrinterSDK.xcframework"],
+            "args": ["--project", "CPExample", "--demo_target", "CPExample", "--sdk_target", "CPPrinterSDK"],
         },
         {
             "type": "Ruby",

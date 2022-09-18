@@ -4,6 +4,10 @@ require "xcframework.rb"
 require 'project_helper.rb'
 require 'optparse'
 
+#使用sdk target生成xcframework
+#删除sdk项目，将xcframework导入demo项目
+#项目文件压缩打包
+
 options = {}
 opt_parser = OptionParser.new do |opts|
     opts.banner = 'here is help messages of the command line tool.'
@@ -24,10 +28,6 @@ opt_parser = OptionParser.new do |opts|
         options[:sdk_target] = value
     end
     
-    opts.on('--sdk_framework_path path', 'sdk framework path') do |value|
-        options[:sdk_framework_path] = value
-    end
-    
     opts.on_tail('-h', '--help', 'Show this message') do
         puts opts
         exit
@@ -39,12 +39,10 @@ opt_parser.parse!(ARGV)
 project_path = options[:project]
 demo_target = options[:demo_target]
 sdk_target = options[:sdk_target]
-sdk_framework_path = options[:sdk_framework_path]
 
 puts 'project path =>       ' + project_path
 puts 'demo target =>        ' + demo_target
 puts 'sdk target =>         ' + sdk_target
-puts 'sdk framework path => ' + sdk_framework_path
 
 system 'pwd'
 
@@ -58,12 +56,13 @@ def moveProject(source_path, dst_path)
     puts flag
 end
 
-# xcframework_archive(sdk_target)
-# relpaceTargetWithFramework(project_path, demo_target, sdk_target, sdk_framework_path)
+xcframework_archive_home = 'framework'
+sdk_framework_path = '%s/%s.xcframework' % [xcframework_archive_home, sdk_target]
 
-work_space = "/Users/ldc/Desktop/home"
+xcframework_archive(sdk_target, xcframework_archive_home)
+
 current_path = Dir.pwd
-# current_path = current_path.split('\n').first
+work_space = "/Users/ldc/Desktop/home"
 
 if File.directory?(work_space)
     deleteDirectory(work_space)
@@ -74,4 +73,24 @@ puts cmd
 flag = system cmd
 puts flag
 
-moveProject(current_path, '%s/%s' % [work_space, current_path.split('/').last])
+home_dir_name = current_path.split('/').last
+work_space_project_path = '%s/%s' % [work_space, home_dir_name]
+
+moveProject(current_path, work_space_project_path)
+relpaceTargetWithFramework(work_space_project_path, project_path, demo_target, sdk_target, sdk_framework_path)
+
+zip_name = home_dir_name
+
+git_repo_path = '%s/.git' % [work_space_project_path]
+
+if File.directory?(git_repo_path)
+    cmd = 'rm -rf %s' % [git_repo_path]
+    puts cmd
+    flag = system cmd
+    puts flag
+end
+
+cmd = 'cd %s;zip -r %s/%s.zip %s' % [work_space, work_space, zip_name, home_dir_name]
+puts cmd
+flag = system cmd
+puts flag

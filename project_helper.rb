@@ -1,7 +1,10 @@
 require 'directory.rb'
+require 'xcodeproj'
 
-def relpaceTargetWithFramework(project_path, target_name, sdk_target, sdk_framework_path)
-    project = Xcodeproj::Project.open(project_path)
+def relpaceTargetWithFramework(project_home, project_name, target_name, sdk_target, sdk_framework_path)
+
+    xcodeproj_path = '%s/%s.xcodeproj' % [project_home, project_name]
+    project = Xcodeproj::Project.open(xcodeproj_path)
 
     #找到目标target
     target = project.targets.select do |target|
@@ -49,6 +52,7 @@ def relpaceTargetWithFramework(project_path, target_name, sdk_target, sdk_framew
 
     #文件创建引用
 
+    sdk_framework_path = '%s/%s' % [project_home, sdk_framework_path]
     file_reference = project.new_file(sdk_framework_path)
     #这个两个参数似乎会根据文件路径自动设置
     #file_reference.last_known_file_type = 'wrapper.xcframework'
@@ -76,7 +80,7 @@ def relpaceTargetWithFramework(project_path, target_name, sdk_target, sdk_framew
         group.remove_from_project
     end
 
-    deleteDirectory('CPExample/CPPrinterSDK')
+    deleteDirectory('%s/%s' % [project_home, sdk_target])
 
     #files = target.source_build_phase.files.to_a.map do |pbx_build_file|
     #    pbx_build_file.file_ref.real_path.to_s

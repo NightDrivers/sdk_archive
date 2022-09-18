@@ -1,7 +1,7 @@
 require 'directory.rb'
 
-def xcframework_archive(sdk_target_name)
-    work_dir = 'framework'
+def xcframework_archive(sdk_target_name, work_dir)
+    
     iphoneos_dir = 'build/Release-iphoneos/%s.framework' % [sdk_target_name]
     iphone_simulator_dir = 'build/Release-iphonesimulator/%s.framework' % [sdk_target_name]
 
@@ -34,7 +34,9 @@ def xcframework_archive(sdk_target_name)
 
     puts flag
 
-    flag = system 'open framework'
+    deleteDirectory('build')
 
-    puts flag
+    # flag = system 'open framework'
+
+    # puts flag
 end
