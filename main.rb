@@ -94,3 +94,8 @@ cmd = 'cd %s;zip -r %s/%s.zip %s' % [work_space, work_space, zip_name, home_dir_
 puts cmd
 flag = system cmd
 puts flag
+
+cmd = 'open %s' % [work_space]
+puts cmd
+flag = system cmd
+puts flag

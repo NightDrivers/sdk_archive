@@ -21,9 +21,8 @@
         {
             "type": "Ruby",
             "request": "launch",
-            "name": "Test1",
-            "program": "${workspaceRoot}/test1.rb",
-            "args": ["-target", "CPExample"],
+            "name": "Test",
+            "program": "${workspaceRoot}/test.rb",
         }
     ]
 }
