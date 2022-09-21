@@ -2,7 +2,7 @@ require 'optparse'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'directory.rb'
 
-def xcframework_archive(sdk_target_name, dst_path, product_name = nil)
+def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimulatorBuildSettings = nil)
     
     if dst_path == nil
         dst_path = 'framework'
@@ -29,7 +29,13 @@ def xcframework_archive(sdk_target_name, dst_path, product_name = nil)
 
     puts flag
 
-    flag = system 'xcodebuild OTHER_CFLAGS="-fembed-bitcode" -configuration "Release" -target %s -sdk iphonesimulator build' % [sdk_target_name]
+    cmd = 'xcodebuild OTHER_CFLAGS="-fembed-bitcode"'
+    if cmd != nil
+        cmd = cmd + ' %s ' % [extraSimulatorBuildSettings]
+    end
+    cmd = cmd + '-configuration "Release" -target %s -sdk iphonesimulator build' % [sdk_target_name]
+
+    flag = system cmd
 
     puts flag
 
@@ -71,6 +77,10 @@ if __FILE__ == $0
         opts.on('--product_name name', 'product path') do |value|
             options[:product_name] = value
         end
+
+        opts.on('--extra_simulator_build_settings settings', 'extra simulator build settings') do |value|
+            options[:extra_simulator_build_settings] = value
+        end
         
         opts.on_tail('-h', '--help', 'Show this message') do
             puts opts
@@ -83,8 +93,12 @@ if __FILE__ == $0
     sdk_target_name = options[:sdk_target_name]
     dst_path = options[:dst_path]
     product_name = options[:product_name]
+    extra_simulator_build_settings = options[:extra_simulator_build_settings]
+    if dst_path == nil
+        dst_path = 'framework'
+    end
 
-    xcframework_archive(sdk_target_name, dst_path, product_name)
+    xcframework_archive(sdk_target_name, dst_path, product_name, extra_simulator_build_settings)
 
     system 'open %s' % [File.expand_path(dst_path, Dir.pwd)]
 end
