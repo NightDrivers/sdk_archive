@@ -1,8 +1,8 @@
+require 'optparse'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 #LOAD_PATH 为文件加载的路径数组，这段代码表示将当前文件所在的目录添加至加载目录
 require "xcframework.rb"
 require 'project_helper.rb'
-require 'optparse'
 
 #使用sdk target生成xcframework
 #删除sdk项目，将xcframework导入demo项目
