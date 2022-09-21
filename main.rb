@@ -32,6 +32,10 @@ if __FILE__ == $0
         opts.on('--dst_path path', 'destination path') do |value|
             options[:dst_path] = value
         end
+
+        opts.on('--skip_xcframework_archive', '跳过xcframework打包，忽略时默认将framework文件夹下的库添加到demo项目') do
+            options[:skip_xcframework_archive] = true
+        end
         
         opts.on_tail('-h', '--help', 'Show this message') do
             puts opts
@@ -45,6 +49,7 @@ if __FILE__ == $0
     demo_target = options[:demo_target]
     sdk_target = options[:sdk_target]
     dst_path = options[:dst_path]
+    skip_xcframework_archive = options[:skip_xcframework_archive]
 
     if dst_path == nil
         dst_path = '~/Desktop/home'
@@ -72,7 +77,14 @@ if __FILE__ == $0
     xcframework_archive_home = 'framework'
     sdk_framework_path = '%s/%s.xcframework' % [xcframework_archive_home, sdk_target]
 
-    xcframework_archive(sdk_target, xcframework_archive_home)
+    if skip_xcframework_archive
+        if !File.directory?(File.expand_path(sdk_framework_path, Dir.pwd))
+            puts '%s not found' % [sdk_framework_path]
+            exit
+        end 
+    else
+        xcframework_archive(sdk_target, xcframework_archive_home)
+    end
 
     current_path = Dir.pwd
 
