@@ -19,10 +19,12 @@
             "args": ["--project", "CPExample", "--demo_target", "CPExample", "--sdk_target", "CPPrinterSDK"],
         },
         {
-            "type": "Ruby",
+            "type": "Ruby",//使用Ruby调试器
             "request": "launch",
-            "name": "Test",
-            "program": "${workspaceRoot}/test.rb",
-        }
+            "name": "xcframework",
+            "program": "${workspaceRoot}/xcframework.rb",
+            "cwd": "/Users/ldc/Desktop/CPExample",
+            "args": ["--sdk_target_name", "CPPrinterSDK", "--dst_path", "xcframework"],
+        },
     ]
 }
