@@ -2,7 +2,7 @@ require 'optparse'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'directory.rb'
 
-def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimulatorBuildSettings = nil)
+def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimulatorBuildSettings = nil, build_macos = false)
     
     if dst_path == nil
         dst_path = 'framework'
@@ -13,6 +13,7 @@ def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimu
 
     iphoneos_dir = 'build/Release-iphoneos/%s.framework' % [product_name]
     iphone_simulator_dir = 'build/Release-iphonesimulator/%s.framework' % [product_name]
+    macos_dir = 'build/Release/%s.framework' % [product_name]
 
     if File.directory?('build')
         deleteDirectory('build')
@@ -39,13 +40,27 @@ def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimu
 
     puts flag
 
+    if build_macos
+        cmd = 'xcodebuild -configuration "Release" -target %s -sdk macosx build' % [sdk_target_name]
+        flag = system cmd
+        puts flag
+    end
+
     if File.directory?(dst_path)
         deleteDirectory(dst_path);
     end
 
     Dir.mkdir(dst_path)
 
-    flag = system 'xcrun xcodebuild -create-xcframework -framework %s -framework %s -output %s/%s.xcframework' % [iphoneos_dir, iphone_simulator_dir, dst_path, product_name]
+    xcframework_cmd = 'xcrun xcodebuild -create-xcframework -framework %s -framework %s' % [iphoneos_dir, iphone_simulator_dir]
+    
+    if build_macos
+        xcframework_cmd += ' -framework %s' % [macos_dir]
+    end
+    
+    xcframework_cmd += ' -output %s/%s.xcframework' % [dst_path, product_name]
+
+    flag = system xcframework_cmd
 
     puts flag
 
