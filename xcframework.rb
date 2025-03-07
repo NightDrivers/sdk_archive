@@ -2,7 +2,12 @@ require 'optparse'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'directory.rb'
 
-def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimulatorBuildSettings = nil, extraPhoneosBuildSettings = nil)
+def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimulatorBuildSettings = nil, extraPhoneosBuildSettings = nil, build_macos = false)
+    puts "Building XCFramework with settings:"
+    puts "- Target: #{sdk_target_name}"
+    puts "- Destination: #{dst_path}"
+    puts "- Product: #{product_name || sdk_target_name}"
+    puts "- Build macOS: #{build_macos}"
     
     if dst_path == nil
         dst_path = 'framework'
@@ -13,47 +18,60 @@ def xcframework_archive(sdk_target_name, dst_path, product_name = nil, extraSimu
 
     iphoneos_dir = 'build/Release-iphoneos/%s.framework' % [product_name]
     iphone_simulator_dir = 'build/Release-iphonesimulator/%s.framework' % [product_name]
+    macos_dir = 'build/Release/%s.framework' % [product_name]
 
     if File.directory?('build')
         deleteDirectory('build')
     end
 
-    #puts iphoneos_dir
-    #puts iphone_simulator_dir
-
-    cmd = 'xcodebuild'
+    # Build iOS device version
+    puts "\nBuilding iOS device framework..."
+    cmd = 'xcodebuild OTHER_CFLAGS="-fembed-bitcode"'
     if extraPhoneosBuildSettings != nil
         cmd = cmd + ' %s' % [extraPhoneosBuildSettings]
     end
     cmd = cmd + ' -configuration "Release" -target %s -sdk iphoneos build' % [sdk_target_name]
 
     puts cmd
-
     flag = system cmd
+    puts "iOS device build #{flag ? 'succeeded' : 'failed'}"
 
-    puts flag
-
-    cmd = 'xcodebuild'
+    # Build iOS simulator version
+    puts "\nBuilding iOS simulator framework..."
+    cmd = 'xcodebuild OTHER_CFLAGS="-fembed-bitcode"'
     if extraSimulatorBuildSettings != nil
-        cmd = cmd + ' %s' % [extraSimulatorBuildSettings]
+        cmd = cmd + ' %s ' % [extraSimulatorBuildSettings]
     end
     cmd = cmd + ' -configuration "Release" -target %s -sdk iphonesimulator build' % [sdk_target_name]
-
-    puts cmd
-
     flag = system cmd
+    puts "iOS simulator build #{flag ? 'succeeded' : 'failed'}"
 
-    puts flag
+    # Build macOS version if requested
+    if build_macos
+        puts "\nBuilding macOS framework..."
+        cmd = 'xcodebuild -configuration "Release" -target %s -sdk macosx build' % [sdk_target_name]
+        flag = system cmd
+        puts "macOS build #{flag ? 'succeeded' : 'failed'}"
+    end
 
     if File.directory?(dst_path)
-        deleteDirectory(dst_path);
+        deleteDirectory(dst_path)
     end
 
     Dir.mkdir(dst_path)
 
-    flag = system 'xcrun xcodebuild -create-xcframework -framework %s -framework %s -output %s/%s.xcframework' % [iphoneos_dir, iphone_simulator_dir, dst_path, product_name]
+    # Create XCFramework command
+    puts "\nCreating XCFramework..."
+    xcframework_cmd = 'xcrun xcodebuild -create-xcframework -framework %s -framework %s' % [iphoneos_dir, iphone_simulator_dir]
+    
+    if build_macos
+        xcframework_cmd += ' -framework %s' % [macos_dir]
+    end
+    
+    xcframework_cmd += ' -output %s/%s.xcframework' % [dst_path, product_name]
 
-    puts flag
+    flag = system xcframework_cmd
+    puts "XCFramework creation #{flag ? 'succeeded' : 'failed'}"
 
     deleteDirectory('build')
 
@@ -88,6 +106,10 @@ if __FILE__ == $0
             options[:extra_simulator_build_settings] = value
         end
 
+        opts.on('--build_macos', 'build macOS framework') do |value|
+            options[:build_macos] = value
+        end
+
         opts.on('--extraPhoneosBuildSettings settings', 'extra iphones build settings') do |value|
             options[:extraPhoneosBuildSettings] = value
         end
@@ -104,12 +126,13 @@ if __FILE__ == $0
     dst_path = options[:dst_path]
     product_name = options[:product_name]
     extra_simulator_build_settings = options[:extra_simulator_build_settings]
+    build_macos = options[:build_macos]
     extraPhoneosBuildSettings = options[:extraPhoneosBuildSettings]
     if dst_path == nil
         dst_path = 'framework'
     end
 
-    xcframework_archive(sdk_target_name, dst_path, product_name, extra_simulator_build_settings, extraPhoneosBuildSettings)
+    xcframework_archive(sdk_target_name, dst_path, product_name, extra_simulator_build_settings, extraPhoneosBuildSettings, build_macos)
 
     system 'open %s' % [File.expand_path(dst_path, Dir.pwd)]
 end
