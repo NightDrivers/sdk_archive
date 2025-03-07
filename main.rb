@@ -33,6 +33,10 @@ if __FILE__ == $0
             options[:dst_path] = value
         end
 
+        opts.on('--dynamic_framework', 'is dynamic framework') do |value|
+            options[:dynamic_framework] = value
+        end
+
         opts.on('--skip_xcframework_archive', '跳过xcframework打包，忽略时默认将framework文件夹下的库添加到demo项目') do
             options[:skip_xcframework_archive] = true
         end
@@ -50,6 +54,7 @@ if __FILE__ == $0
     sdk_target = options[:sdk_target]
     dst_path = options[:dst_path]
     skip_xcframework_archive = options[:skip_xcframework_archive]
+    dynamic_framework = options[:dynamic_framework]
 
     if dst_path == nil
         dst_path = '~/Desktop/home'
@@ -103,9 +108,9 @@ if __FILE__ == $0
     end
 
     moveProject(current_path, dst_path_project_path)
-    version = relpaceTargetWithFramework(dst_path_project_path, project_path, demo_target, sdk_target, sdk_framework_path)
+    version = relpaceTargetWithFramework(dst_path_project_path, project_path, demo_target, sdk_target, sdk_framework_path, dynamic_framework)
 
-    zip_name = '%s-%s' % [home_dir_name, version]
+    zip_name = '%s-iOS-%s' % [home_dir_name, version]
 
     git_repo_path = File.expand_path('.git', dst_path_project_path)
 

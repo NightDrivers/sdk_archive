@@ -1,7 +1,7 @@
 require 'directory.rb'
 require 'xcodeproj'
 
-def relpaceTargetWithFramework(project_home, project_name, target_name, sdk_target, sdk_framework_path)
+def relpaceTargetWithFramework(project_home, project_name, target_name, sdk_target, sdk_framework_path, is_dynamic_framework = false)
 
     xcodeproj_path = '%s/%s.xcodeproj' % [project_home, project_name]
     xcodeproj_path = File.expand_path('%s.xcodeproj' % [project_name], project_home)
@@ -67,11 +67,14 @@ def relpaceTargetWithFramework(project_home, project_name, target_name, sdk_targ
 
     #创建copy_files_build_phase
 
-    copy_files_build_phase = target.new_copy_files_build_phase('Embed Frameworks')
-    copy_files_build_phase.dst_path = ''
-    copy_files_build_phase.dst_subfolder_spec = '10'
-    copy_files_build_phase_build_file = copy_files_build_phase.add_file_reference(file_reference)
-    copy_files_build_phase_build_file.settings = {"ATTRIBUTES" => ["CodeSignOnCopy", "RemoveHeadersOnCopy"] }
+    if is_dynamic_framework
+        # 以下为动态库绑定逻辑 后续增加参数，或者直接根据sdk项目是否是动态库判断是否需要绑定
+        copy_files_build_phase = target.new_copy_files_build_phase('Embed Frameworks')
+        copy_files_build_phase.dst_path = ''
+        copy_files_build_phase.dst_subfolder_spec = '10'
+        copy_files_build_phase_build_file = copy_files_build_phase.add_file_reference(file_reference)
+        copy_files_build_phase_build_file.settings = {"ATTRIBUTES" => ["CodeSignOnCopy", "RemoveHeadersOnCopy"] }
+    end
 
     #添加frameworks_build_phase
 
