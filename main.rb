@@ -121,6 +121,11 @@ if __FILE__ == $0
         puts flag
     end
 
+    cmd = 'cd %s;rm -f *.sh' % [dst_path_project_path]
+    puts cmd
+    flag = system cmd
+    puts flag
+
     cmd = 'cd %s;zip -r %s/%s.zip %s' % [dst_path, dst_path, zip_name, home_dir_name]
     puts cmd
     flag = system cmd
